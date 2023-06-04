@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="output.css"/>
+    <link rel="icon" href="../MEDIA/IMAGES/colin.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Multi-threaded Chat Server</title>
+</head>
+<body>
+<!-- Navigation bar element -->
+<ul class="navBar">
+    <li class="navList">
+        <a class="navLink" href="Home.html">Home</a>
+    </li>
+    <li class="navList">
+        <a class="navLink" href="project.html">Project</a>
+        <ul class="dropdown">
+            <li><a class="text-white" href="exampleWorkOne.html">Shell Program</a></li>
+            <li><a class="text-white" href="exampleWorkTwo.html">Multi-threaded Chat  Server</a></li>
+            <li><a class ="text-white" href="exampleWorkThree.html">Implementation of Malloc</a></li>
+        </ul>
+    </li>
+</ul>
+
+<h1>Program description:</h1>
+<!-- Paragraph about the program -->
+<table><tbody><tr><td><pre class="programInfo">
+
+</pre></td></tr></tbody></table>
+<hr>
+
+
+<!-- Holds the top position for the jump element -->
+<h2 id="top" class="pb-8 font-bold">Program: </h2>
+
+<!-- Jumps to the bottom of the page -->
+<div class="relative rounded-xl overflow-auto p-8">
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Explanation</a> </div>
+</div>
+
+<!-- Contains program and comments about said program -->
+<div class="relative rounded-l overflow-auto">
+    <div class="flex justify-center font-mono text-sm leading-6">
+        <table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
+
+/*
+ * Colin Lyttle
+ * chatServer.c
+ * 5/9/2023
+ * This is my chat server. There are many like it, but I've locked the mutex so it's mine.
+*/
+#include stdio.h
+#include stdlib.h
+#include unistd.h
+#include string.h
+#include pthread.h
+#include "jrb.h"
+#include "dllist.h"
+#include "sockettome.h"
+
+
+void segPipeIgnore(int pipeSFX) {
+    printf("segPipeIgnore\n");
+}
+
+
+struct threadInfo
+{
+    char chatroomName[1000];
+    char userName[1000]; ///Good
+    Dllist clientsPtr;
+    Dllist msgPtr;
+    Dllist chatrooms;
+    pthread_mutex_t *lock; ///Good
+    pthread_cond_t *cond; ///Good!
+    FILE *fin;
+    FILE *fout;
+
+}threadInfo;
+
+struct chatRoomInfo
+{
+    char roomName[1000];///Good
+    pthread_mutex_t *lock; ///Good
+    pthread_cond_t *cond; ///Good!
+    Dllist clients;///Good
+    Dllist messages; ///Good
+}chatty;
+
+
+void username(struct threadInfo *t)
+{
+    char s[1000];
+    memset(s, 0, sizeof(s));
+    if (fgets(s, 1000, t->fin) == NULL) {
+        printf("Error -- socket fclosed\n");
+
+        if (fclose(t->fin) == -1) {
+            perror("username(): t->fin Error closing file");
+            exit(1);
+        }
+        else
+        {
+            printf("username(): Closing t->fin\n");
+        }
+        free(t);
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);
+
+    }
+    s[strlen(s)-1] = '\0';
+    strcpy(t->userName,s);
+}
+
+void enterChatRoom(struct threadInfo *t)
+{
+    struct chatRoomInfo *tmpChatroom;
+    char s[1000];
+    memset(s, 0, sizeof(s));
+    if (fgets(s, 1000, t->fin) == NULL) {
+        printf("Error -- socket fclosed\n");
+        if (fclose(t->fin) == -1) {
+            perror("enterChatRoom(): t->fin Error closing file");
+            exit(1);
+        }
+        else
+        {
+            printf("enterChatRoom(): Closing t->fin\n");
+        }
+
+        free(t);
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);
+
+    }
+    s[strlen(s)-1] = '\0';
+    Dllist chatroomTraverse;
+
+    dll_traverse(chatroomTraverse,t->chatrooms)
+    {
+        ///This is pulling out a chatroom struct
+        tmpChatroom = chatroomTraverse->val.v;
+        if(strcmp(tmpChatroom->roomName,s) == 0)
+        {
+            printf("1. enterChatRoom() tmpInf->lock\n");
+            if (pthread_mutex_lock(tmpChatroom->lock) != 0) { perror("Mutex lock"); exit(1); } /// LOCKING tmpInf->
+            printf("Adding New User! %s\n", t->userName);
+
+            dll_append(tmpChatroom->clients, new_jval_v((void *) t));
+            t->clientsPtr = dll_last(tmpChatroom->clients);
+            t->msgPtr = tmpChatroom->messages;
+            t->lock = tmpChatroom->lock;
+            t->cond = (tmpChatroom->cond);
+
+            strcpy(t->chatroomName,tmpChatroom->roomName);
+
+
+            char tmp[1000];
+            memset(tmp, 0, sizeof(tmp));
+
+            strcpy(tmp,t->userName);
+            strcat(tmp," has joined\n");
+            dll_append(tmpChatroom->messages, new_jval_s(strdup(tmp)));
+
+
+            printf("1. enterChatRoom() pthread_mutex_unlock tmpInf->\n");
+             pthread_cond_signal(tmpChatroom->cond);
+            if (pthread_mutex_unlock(tmpChatroom->lock) != 0) { perror("Mutex unlock"); exit(1); } /// UNLOCKING tmpInf->
+
+            break;
+        }
+    }
+    printf("%s has joined\n", t->userName);
+}
+
+void userIo(struct threadInfo *t)
+{
+
+    char s[1000];
+    memset(s, 0, sizeof(s));
+    printf("Waiting for message from: %s\n", t->userName);
+    if (fgets(s, 1000, t->fin) == NULL) {
+        char tmpDisconnectMessage[1000];
+        memset(tmpDisconnectMessage, 0, sizeof(tmpDisconnectMessage));
+
+        printf("%s has left\n", t->userName);
+        strcpy(tmpDisconnectMessage,t->userName);
+        strcat(tmpDisconnectMessage, " has left");
+        strcat(tmpDisconnectMessage,"\n");
+
+
+        if (fclose(t->fin) == -1) {
+            perror("userIo(): t->fin Error closing file");
+            exit(1);
+        }
+        else
+        {
+            printf("userIo(): Closing t->fin\n");
+        }
+
+
+        if (pthread_mutex_lock(t->lock) != 0) { perror("Mutex lock"); exit(1); } /// LOCKING tmpIntr->
+        printf("1. userIo() | LOCKING %s\n",t->chatroomName);
+
+        dll_append(t->msgPtr, new_jval_s(strdup(tmpDisconnectMessage)));
+
+        dll_delete_node(t->clientsPtr);
+        printf("1. userIo() | SENDING SIGNAL to %s\n",t->chatroomName);
+        pthread_cond_signal(t->cond);
+        printf("1. userIo() | SIGNAL FINISHED from %s\n",t->chatroomName);
+        if (pthread_mutex_unlock(t->lock) != 0) {  perror("Mutex unlock"); exit(1); } /// UNLOCKING tmpIntr->
+        printf("1. userIo() | Unlocking %s\n",t->chatroomName);
+
+
+        free(t);
+        pthread_detach(pthread_self());
+        pthread_exit(NULL);
+    }
+    printf("MESSAGE RECEIVED from: %s\n", t->userName);
+    char formattedMessage[1000];
+    memset(formattedMessage, 0, sizeof(formattedMessage));
+    strcpy(formattedMessage,t->userName);
+    strcat(formattedMessage,": ");
+    strcat(formattedMessage,s);
+
+    printf("2. userIo() | Thinking about locking %s\n",t->chatroomName);
+    if (pthread_mutex_lock(t->lock) != 0) {  perror("Mutex lock"); exit(1); } /// LOCKING CHATROOM
+    printf("2. userIo() | LOCKING %s\n",t->chatroomName);
+    printf("userIo() | USER: %s added message %s to chatroom %s!\n",t->userName,formattedMessage,t->chatroomName);
+    dll_append(t->msgPtr, new_jval_s(strdup(formattedMessage)));
+    printf("2. userIo() | SENDING SIGNAL to %s\n",t->chatroomName);
+    pthread_cond_signal(t->cond);
+    printf("2. userIo() | SIGNAL FINISHED from %s\n",t->chatroomName);
+    if (pthread_mutex_unlock(t->lock) != 0) { perror("Mutex unlock"); exit(1); } /// UNLOCKING CHATROOM
+    printf("2. userIo() | Unlocking %s\n",t->chatroomName);
+}
+
+
+
+void *chatRoomThread(void *arg)
+{
+    struct chatRoomInfo *chat  = arg;
+    printf("Thread Room Name: %s\n", chat->roomName);
+    /// Sends the message to all users
+
+    while(1)
+    {
+        printf("chatRoomThread() | pthread_cond_wait %s\n", chat->roomName);
+        pthread_cond_wait(chat->cond, chat->lock); /// Locking chat struct
+
+       printf("chatRoomThread() | UNLOCKING WAIT %s\n", chat->roomName);
+
+        printf("SENDING MESSAGE TO CLIENT! From ChatRoom %s\n",chat->roomName);
+        while(!dll_empty(chat->messages))
+        {
+            ///Sends the message to all users
+            Dllist fdPtr;
+            struct threadInfo *tmpThreadPtr;
+
+            dll_traverse(fdPtr,chat->clients)
+            {
+                tmpThreadPtr = fdPtr->val.v;
+                if (!ferror(tmpThreadPtr->fout)) {
+                    fflush(tmpThreadPtr->fout);
+                }
+                else
+                {
+                    printf("PIPE!!!!\n");
+                }
+                printf("SENDING MESSAGE! %s | to %s | in chatroom %s\n",chat->messages->flink->val.s,tmpThreadPtr->userName,chat->roomName);
+                if (fputs(chat->messages->flink->val.s, tmpThreadPtr->fout) == EOF) {
+
+                }
+                if (!ferror(tmpThreadPtr->fout)) {
+                    fflush(tmpThreadPtr->fout);
+                }
+                else
+                {
+                    printf("PIPE!!!!\n");
+                }
+
+            }
+            free(chat->messages->flink->val.s);
+            dll_delete_node(dll_first(chat->messages));
+        }
+
+
+    }
+}
+
+void *waitRoom(void *arg)
+{
+
+    struct threadInfo *info  = arg;
+    struct chatRoomInfo *tmpChatroomPtr;
+    struct threadInfo *tmpInfo;
+
+    if (fputs("Chat Rooms:\n\n", info->fout) == EOF) {
+
+    }
+    if (!ferror(info->fout)) {
+        fflush(info->fout);
+    }
+    else
+    {
+        printf("PIPE!!!!\n");
+    }
+
+    ///Prevents new users from being added before thread is done
+    Dllist chatTraverse;
+    Dllist userTraverse;
+    dll_traverse(chatTraverse,info->chatrooms)
+    {
+        ///Pulling up a chatroom Struct
+        tmpChatroomPtr = chatTraverse->val.v;
+
+        if (fputs(tmpChatroomPtr->roomName, info->fout) == EOF) {
+
+        }
+        if (!ferror(info->fout)) {
+            fflush(info->fout);
+        }
+        else
+        {
+            printf("PIPE!!!!\n");
+        }
+
+        if (fputs(":", info->fout) == EOF) {
+
+        }
+        if (!ferror(info->fout)) {
+            fflush(info->fout);
+        }
+        else
+        {
+            printf("PIPE!!!!\n");
+        }
+
+
+        if (pthread_mutex_lock(tmpChatroomPtr->lock) != 0) { perror("Mutex lock"); exit(1); } /// LOCKING CHATROOM
+        dll_traverse(userTraverse,tmpChatroomPtr->clients)
+        {
+
+            tmpInfo = userTraverse->val.v;
+
+            if (fputs(" ", info->fout) == EOF) {
+
+            }
+            if (!ferror(info->fout)) {
+                fflush(info->fout);
+            }
+            else
+            {
+                printf("PIPE!!!!\n");
+            }
+
+            if (fputs(tmpInfo->userName, info->fout) == EOF) {
+
+
+            }
+            if (!ferror(info->fout)) {
+                fflush(info->fout);
+            }
+            else
+            {
+                printf("PIPE!!!!\n");
+            }
+        }
+
+        if (pthread_mutex_unlock(tmpChatroomPtr->lock) != 0) { perror("Mutex unlock"); exit(1); } /// UNLOCKING CHATROOM
+
+        if (fputs("\n", info->fout) == EOF) {
+
+        }
+
+        if (!ferror(info->fout)) {
+            fflush(info->fout);
+        }
+        else
+        {
+            printf("PIPE!!!!\n");
+        }
+    }
+
+    if (fputs("\nEnter your chat name (no spaces):\n", info->fout) == EOF) {
+
+    }
+    if (!ferror(info->fout)) {
+        fflush(info->fout);
+    }
+    else
+    {
+        printf("PIPE!!!!\n");
+    }
+
+    ///Gets username from file
+    username(info);
+    /// Attempting to enter a chat room
+
+    if (fputs("Enter chat room:\n", info->fout) == EOF) {
+
+    }
+    if (!ferror(info->fout)) {
+        fflush(info->fout);
+    }
+    else
+    {
+        printf("PIPE!!!!\n");
+    }
+
+    ///Sup
+
+    enterChatRoom(info);
+
+    ///This is where client threads will spool, sending messages and such.
+    while(1)
+    {
+        userIo(info);
+    }
+}
+
+
+int main(int argc, char **argv) {
+    //argv[1] = "8001";
+    /// Creating threads
+    int port, fd;
+    pthread_t server,client;
+    Dllist currentRooms;
+    currentRooms = new_dllist();
+    signal(SIGPIPE, segPipeIgnore );
+    port = atoi(argv[1]);
+    if (port < 8000) {
+        fprintf(stderr, "port must be >= 8000\n");
+        exit(1);
+    }
+
+    int index = 2;
+    /// Creates chatRoom threads
+    for(int i = 0; i < argc-2; i++)
+    {
+        //printf("New Chatroom Starting\n");
+        struct chatRoomInfo *chat;
+        chat = malloc(sizeof(chatty));
+        strcpy(chat->roomName,argv[index]);
+        chat->clients = new_dllist();
+        chat->lock  = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+        pthread_mutex_init(chat->lock, NULL);
+        chat->messages = new_dllist();
+        chat->cond = (pthread_cond_t *) malloc(sizeof(pthread_cond_t));
+        pthread_cond_init(chat->cond, NULL);
+        dll_append(currentRooms,new_jval_v((void *) chat));
+        if (pthread_create(&server, NULL, chatRoomThread, (void*)chat) != 0) {
+            printf("pthread_create chatRoomThread");
+            exit(1);
+        }
+        index++;
+    }
+
+    int sock = serve_socket(port);
+    printf("Spooling Server\n");
+    int threadId = 0;
+
+    while (1)
+    {
+        fd = accept_connection(sock);
+        if (fd != 0)
+        {
+            FILE *fout = fdopen(fd, "w");
+            FILE *fin = fdopen(fd, "r");
+
+            printf("Thread: %d | New Client!\n",threadId);
+            struct threadInfo *threadInf;
+
+            threadInf = malloc(sizeof(threadInfo));
+            threadInf->fout = fout;
+            threadInf->fin = fin;
+            threadInf->chatrooms = currentRooms;
+
+            if (pthread_create(&client, NULL, waitRoom, (void*)threadInf) != 0) {
+                printf("pthread_create client");
+                exit(1);
+            }
+            threadId++;
+        }
+    }
+
+}
+</pre></td></tr></tbody></table>
+    </div></div>
+
+<!-- Jumps to top of page -->
+<div class="relative rounded-xl overflow-auto p-8">
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#top">Jump to top</a> </div>
+</div>
+<hr>
+
+<!-- Explains difficult aspects of the program or funny stories about the process -->
+<div id="explanation"><h3>Explanation:</h3></div>
+
+<table><tbody><tr><td><pre class="programInfo">
+
+</pre></td></tr></tbody></table>
+
+<div class=""> <a href="exampleWorkOne.html">dwadwadw</a></div>
+
+<hr>
+
+<footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-between">
+            <div class="w-full md:w-1/2 text-center md:text-left">
+                <p>&copy; 2023 Colin Lyttle</p>
+            </div>
+            <div class="w-full md:w-1/2 text-center md:text-right">
+                <ul class="inline-flex list-none">
+                    <li><a href="Home.html" class="text-white hover:text-white px-3">Home</a></li>
+                    <li><a href="https://www.linkedin.com/in/colin-lyttle-192b53182/" class="text-white hover:text-white px-3">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

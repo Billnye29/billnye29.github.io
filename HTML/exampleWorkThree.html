@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="output.css"/>
+    <link rel="icon" href="../MEDIA/IMAGES/colin.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Implementation of Malloc</title>
+</head>
+<body>
+<!-- Navigation bar element -->
+<ul class="navBar">
+    <li class="navList">
+        <a class="navLink" href="Home.html">Home</a>
+    </li>
+    <li class="navList">
+        <a class="navLink" href="project.html">Project</a>
+        <ul class="dropdown">
+            <li><a class="text-white" href="exampleWorkOne.html">Shell Program</a></li>
+            <li><a class="text-white" href="exampleWorkTwo.html">Multi-threaded Chat  Server</a></li>
+            <li><a class ="text-white" href="exampleWorkThree.html">Implementation of Malloc</a></li>
+        </ul>
+    </li>
+</ul>
+
+<h1>Program description:</h1>
+<!-- Paragraph about the program -->
+<table><tbody><tr><td><pre class="programInfo">
+
+</pre></td></tr></tbody></table>
+<hr>
+
+<!-- Holds the top position for the jump element -->
+<h2 id="top" class="pb-8 font-bold">Program: </h2>
+
+<!-- Jumps to the bottom of the page -->
+<div class="relative rounded-xl overflow-auto p-8">
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Explanation</a> </div>
+</div>
+
+<!-- Contains program and comments about said program -->
+<div class="relative rounded-l overflow-auto">
+    <div class="flex justify-center font-mono text-sm leading-6">
+        <table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
+/*
+ * Colin Lyttle
+ * malloc.c
+ * 4/09/2023
+ * My own implementation of malloc
+*/
+#include &lt;unistd.h&gt;
+
+#define MIN_SBRK_SIZE 8192
+
+typedef struct BLOCK {
+    int size;
+    int count;
+    struct BLOCK *next;
+    // struct BLOCK *prev;
+} *BLOCK;
+
+BLOCK head = NULL;
+
+
+BLOCK nalloc(size_t size) {
+    BLOCK n = sbrk(size);
+    n->size = size;
+    n->next = NULL;
+    return n;
+}
+
+
+void my_free(void *ptr) {
+    if (ptr == NULL) {
+        return;
+    }
+    BLOCK temp = head;
+    BLOCK temp2 = head;
+    BLOCK temp2Prev = NULL;
+    BLOCK temp3 = (BLOCK) ((char *) ptr - 8);
+    BLOCK temp4;
+    if (head == NULL) {
+        head = (BLOCK) ((char *) ptr - 8);
+        head->next = temp;
+    } else {
+
+        temp2 = head;
+        temp2Prev = NULL;
+
+        while (1) {
+            temp2Prev = temp2;
+            temp2 = temp2->next;
+
+            if (temp2 == NULL) {
+                temp2Prev->next = ((char *) ptr - 8);
+                temp2Prev = temp2Prev->next;
+                temp2Prev->next = NULL;
+
+                break;
+            }
+        }
+
+
+    }
+
+}
+
+
+BLOCK newBlocks(size_t size) {
+    if (size > MIN_SBRK_SIZE) {
+        return (nalloc(size));
+    }
+
+    BLOCK newNode = nalloc(MIN_SBRK_SIZE);
+    BLOCK temp;
+    temp = newNode;
+    temp = (struct BLOCK *) ((char *) newNode + size);
+    temp->size = newNode->size - size;
+
+    my_free((char *) temp + 8);
+    newNode->size = size;
+    return newNode;
+
+}
+
+
+void *my_malloc(size_t size) {
+    int sizeFlag = 0;
+    size = (size + 7 + 8) & -8;  // align on 8-byte boundary
+
+    BLOCK newNode = head;
+    BLOCK tempNode;
+    BLOCK tempo = head;
+    BLOCK headPre = head;
+    while (1) {
+        /// No blocks found so create new block
+        if (tempo == NULL) {
+            if (size <= MIN_SBRK_SIZE) {
+
+                tempo = newBlocks(size);
+                return (char *) tempo + 8;
+            } else {
+                tempo = newBlocks(size);
+                return (char *) tempo + 8;
+            }
+        } else {
+            if (tempo->size > size) {
+                if (sizeFlag == 1) {
+                    tempNode = (struct BLOCK *) ((char *) tempo + size);
+                    tempNode->size = tempo->size - size;
+                    tempNode->next = tempo->next;
+                    headPre->next = tempNode;
+                    tempo->size = size;
+                    return (char *) tempo + 8;
+                } else {
+                    head = (struct BLOCK *) ((char *) tempo + size);
+                    head->size = tempo->size - size;
+                    head->next = tempo->next;
+                    tempo->size = size;
+
+                    return (char *) tempo + 8;
+                }
+            }
+            if (tempo->size == size) {
+                head = head->next;
+                return (char *) tempo + 8;
+            }
+        }
+
+        tempo = tempo->next;
+
+        if (sizeFlag == 1) {
+
+            headPre = headPre->next;
+        }
+        sizeFlag = 1;
+
+
+    }
+}
+
+void *free_list_begin() {
+    if (head == NULL) {
+        return NULL;
+
+    }
+
+    return head;
+}
+
+void *free_list_next(void *node) {
+    BLOCK tempo = node;
+    if (tempo->next == NULL) {
+        return NULL;
+    }
+    return tempo->next;
+}
+
+void insertionSort() {
+    if (head == NULL || head->next == NULL) {
+        return;
+    }
+    BLOCK sorted = NULL;
+    BLOCK unsorted = head;
+    while (unsorted != NULL) {
+        BLOCK current = unsorted;
+        unsorted = unsorted->next;
+        if (sorted == NULL || current < sorted) {
+
+            current->next = sorted;
+            sorted = current;
+        } else {
+            BLOCK prev = sorted;
+            while (prev->next != NULL && prev->next < current) {
+                prev = prev->next;
+            }
+            current->next = prev->next;
+            prev->next = current;
+        }
+    }
+    head = NULL;
+    head = sorted;
+}
+
+void coalesce_free_list() {
+    insertionSort();
+    if (head == NULL || head->next == NULL) {
+
+        return;
+    }
+    BLOCK temp2prev = head;
+    BLOCK temp2 = head->next;
+
+    while (temp2 != NULL) {
+        if ((char *) temp2prev + temp2prev->size == (char *) temp2) {
+
+            temp2prev->size += temp2->size;
+            temp2prev->next = temp2->next;
+            temp2 = temp2prev->next;
+        } else {
+
+            temp2prev = temp2;
+            temp2 = temp2->next;
+        }
+    }
+}
+</pre></td></tr></tbody></table>
+    </div></div>
+
+
+
+<!-- Jumps to top of page -->
+<div class="relative rounded-xl overflow-auto p-8">
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#top">Jump to top</a> </div>
+</div>
+<hr>
+
+<!-- Explains difficult aspects of the program or funny stories about the process -->
+<div id="explanation"><h3>Explanation:</h3></div>
+
+<table><tbody><tr><td><pre class="programInfo">
+
+</pre></td></tr></tbody></table>
+
+<hr>
+<footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-between">
+            <div class="w-full md:w-1/2 text-center md:text-left">
+                <p>&copy; 2023 Colin Lyttle</p>
+            </div>
+            <div class="w-full md:w-1/2 text-center md:text-right">
+                <ul class="inline-flex list-none">
+                    <li><a href="Home.html" class="text-white hover:text-white px-3">Home</a></li>
+                    <li><a href="https://www.linkedin.com/in/colin-lyttle-192b53182/" class="text-white hover:text-white px-3">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

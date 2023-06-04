@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width" />
+    <link rel="stylesheet" href="output.css"/>
+  <link rel="icon" href="../MEDIA/IMAGES/colin.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <title>Shell Program</title>
+</head>
+<body>
+<!-- Navigation bar element -->
+<ul class="navBar">
+    <li class="navList">
+        <a class="navLink" href="Home.html">Home</a>
+    </li>
+    <li class="navList">
+        <a class="navLink" href="project.html">Project</a>
+        <ul class="dropdown">
+            <li><a class="text-white" href="exampleWorkOne.html">Shell Program</a></li>
+            <li><a class="text-white" href="exampleWorkTwo.html">Multi-threaded Chat  Server</a></li>
+            <li><a class ="text-white" href="exampleWorkThree.html">Implementation of Malloc</a></li>
+        </ul>
+    </li>
+</ul>
+
+<h1>Program description:</h1>
+
+<!-- Paragraph about the program -->
+<table class="font-serif antialiased leading-normal "><tbody><tr><td><pre class="programInfo">
+This program was created for a Lab for one of my junior level classes.
+We were provided and required to use predefined libraries created by Professor James S. Plank inorder to gain experience working with outside libraries.
+The purpose of this program was to create a limited version of csh/sh/bash.
+This version could execute commands, redirect input/output, and implement the operations < , >, >>, & and |.
+In this program I wasn't expected to deal with quotes, environment variable expansions, pattern matching, job control or command histories.
+This program utilizes libraries jval.h and jrb.h which were created by Professor James S. Plank.
+</pre></td></tr></tbody></table>
+
+<hr>
+<!-- Holds the top position for the jump element -->
+<h2 id="top" class="pb-8 font-bold">Program: </h2>
+
+<!-- Jumps to the bottom of the page -->
+<div class="relative rounded-xl overflow-auto p-8">
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Explanation</a> </div>
+</div>
+
+<!-- Contains program and comments about said program -->
+<div class="relative rounded-l overflow-auto">
+    <div class="flex justify-center font-mono text-sm leading-6">
+<table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
+    <span style="color:darkred">
+/*
+ * Colin Lyttle
+ * 4/23/2023
+ * My own Shell Script
+ * This is a program focuses on using pipes, dup, fork, and exec, to get a deeper understanding on how shells work.
+*/
+    </span>
+
+#include stdio.h
+#include unistd.h
+#include string.h
+#include stdlib.h
+#include sys/wait.h
+#include mqueue.h
+#include "jval.h" <span style="color:dodgerblue"> "Jval.h acts as a container which data is contained in."</span>
+#include "jrb.h"  <span style="color:dodgerblue"> "Jrb.h is a predefined red black tree with traversal, insertion,  and deletion operations."</span>
+    <span style="color:green">/// Gets inputs from the user and formats the data for the program</span>
+int commandCount(char input[], int *ampFlag, int *inputFile, int *inputFlag, int *outputFile, int *outputFileFlag,int *appenedFile, int *appenedFileFlag, int *pipe, int *pipeFlag, int *pipeLocations) {
+    unsigned int it = strlen(input);
+    int word = 0;
+    int iFinal = 0;
+    int j = 0;
+    <span style="color:green">///This error checks the input to verify that there is data in the input[] array. If the input[] array is empty exit the program</span>
+    if (input[0] == ' ' || input[0] == '\n' || input[0] == '\0') {
+        exit(0);
+    }
+
+    <span style="color:green"> ///Replace '\n', ' ', '<' , and '>' with '\0', and count the number of words in the input[] array. This formats the data for the inputPhrasing() function.</span>
+    for (int i = 0; i < it; i++) {
+
+        if (input[i] == ' ' && input[i + 1] != ' ') {
+
+            input[i] = '\0';
+            if (input[i + 1] == '<' || input[i + 1] == '>') {
+
+            } else {
+                word++;
+            }
+
+        }
+
+
+        if (input[i] == '\n') {
+            input[i] = '\0';
+        }
+
+        if (input[i] == '<') {
+            input[i] = '\0';
+            *inputFlag = 1;
+            *inputFile = word + 1;
+        }
+
+       <span style="color:green"> /// Checks if user is calling append</span>
+
+        if (input[i] == '>' && input[i + 1] != '>') {
+            input[i] = '\0';
+            *outputFileFlag = 1;
+            *outputFile = word + 1;
+        }
+        <span style="color:green">///And Call </span>
+        if (input[i] == '>' && input[i + 1] == '>') {
+            input[i] = '\0';
+            *appenedFileFlag = 1;
+            *appenedFile = word + 1;
+        }
+
+        <span style="color:green">///Initialize the pipe flag and count the number of pipes called.</span>
+        if (input[i] == '|') {
+            *pipeFlag = 1;
+            pipeLocations[j] = word + 1;
+            *pipe += 1;
+            j++;
+        }
+
+        if (input[i] == '&') {
+            *ampFlag = 1;
+        }
+        iFinal = i;
+
+    }
+    if (input[iFinal - 1] != '\0' && input[iFinal - 1] != '&') {
+        word++;
+    }
+    return word;
+}
+
+<span style="color:green">/// Assigns formatted input into strings </span>
+void inputPhrasing(char input[], char *newargv[], int commands) {
+
+<span style="color:green">///Formatted for the execute command </span>
+    newargv[commands] = NULL;
+<span style="color:green">/// Index for pointer math </span>
+    int currentIndex = 0;
+
+    for (int i = 0; i < commands; i++) {
+        newargv[i] = input + currentIndex;
+        for (int j = 0; input[currentIndex] != '\0' && input[currentIndex] != '\n' && input[currentIndex] != '|'; j++) {
+            currentIndex++;
+        }
+        if (input[currentIndex] == '|') {
+            newargv[i] = NULL;
+            currentIndex++;
+        }
+
+        for (int j = 0; input[currentIndex] == '\0'; j++) {
+            currentIndex++;
+        }
+    }
+    if (strcmp(newargv[0], "exit") == 0 || strcmp(newargv[0], "CNTL-D") == 0) {
+        exit(0);
+    }
+}
+
+<span style="color:green">/// creates the pipes if pipes exist </span>
+int pipeLine(char newArgv[], char **argUment, int pipeOne[], int pipeTwo[]) {
+
+<span style="color:green">///Initial pipe call </span>
+    int forkPid = fork();
+
+    if (forkPid == 0) {
+        if (dup2(pipeOne[0], 0) != 0) {
+            perror("pipeOne");
+            exit(1);
+        }
+        if (dup2(pipeTwo[1], 1) != 1) {
+            perror("pipeTwo");
+            exit(1);
+        }
+        close(pipeOne[0]);
+        close(pipeOne[1]);
+        close(pipeTwo[1]);
+        close(pipeTwo[0]);
+        execvp(newArgv, argUment);
+        perror(newArgv);
+        exit(1);
+    }
+}
+int main(int argc, char **argv) {
+    JRB deadKids = make_jrb();
+    char *const envp[] = {NULL};
+    char input[8192];
+    int commands = 0;
+    argv[1] = "-";
+
+
+    while (1) {
+        int numPipes[1024];
+        int fd1, fd2;
+        fflush(stdin);
+        fflush(stdout);
+        fflush(stderr);
+
+        int status;
+        fgets(input, sizeof(input), stdin);
+
+        int ampFlag = 0;
+        int inputFlag = 0, inputFile = 0;
+        int outputFileFlag = 0, outputFile = 0;
+        int appendFile = 0, appendFileFlag = 0;
+        int pipeFlag = 0, numPipe = 0;
+
+        commands = commandCount(input, &ampFlag, &inputFile, &inputFlag, &outputFile, &outputFileFlag, &appendFile,&appendFileFlag, &numPipe, &pipeFlag, numPipes);
+
+        char *newargv[commands + 1];
+        inputPhrasing(input, newargv, commands);
+
+        fflush(stdin);
+        fflush(stdout);
+        fflush(stderr);
+
+        int forkPid;
+        int childPid;
+        if (strcmp(argv[1], "-") == 0) {
+        } else {
+            printf("jsh: ");
+        }
+        if (pipeFlag == 0) {
+            forkPid = fork();
+            if (forkPid == 0) {
+
+                if (inputFlag == 1) {
+                    fd1 = open(newargv[inputFile], O_RDONLY);
+                    if (fd1 < 0) {
+                        perror(newargv[inputFile]);
+                        exit(1);
+                    }
+                    close(fd1);
+
+                }
+                if (outputFileFlag == 1 && appendFileFlag == 0) {
+                    fd2 = open(newargv[outputFile], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+                    if (fd2 < 0) {
+                        perror(newargv[outputFile]);
+                        exit(2);
+                    }
+                    if (dup2(fd2, 1) != 1) {
+                        perror("fd2, 1");
+                        exit(1);
+                    }
+
+                    close(fd2);
+                    newargv[outputFile] = NULL;
+                }
+                if (appendFileFlag == 1) {
+                    fd2 = open(newargv[outputFile], O_WRONLY | O_APPEND, 0644);
+                    if (fd2 < 0) {
+                        perror(newargv[outputFile]);
+                        exit(2);
+                    }
+                    if (dup2(fd2, 1) != 1) {
+                        perror("fd2, 1");
+                        exit(1);
+                    }
+                    close(fd2);
+                    newargv[outputFile] = NULL;
+                }
+                execvp(newargv[0], newargv);
+                perror(newargv[0]);
+                exit(1);
+            }
+        }
+        if (pipeFlag == 1) {
+            int inputArray[2];
+            int outPutArray[2];
+
+            int pipeFd[2];
+            pipeFd[0] = -1;
+            pipeFd[1] = -1;
+            int copyOfPipeFd[2];
+            copyOfPipeFd[0] = pipeFd[0];
+            copyOfPipeFd[1] = pipeFd[1];
+
+            if (pipe(pipeFd) < 0) {
+                perror("pipe");
+                exit(1);
+            }
+
+            if (inputFlag == 1) {
+                fd1 = open(newargv[inputFile], O_RDONLY);
+                if (fd1 < 0) {
+                    perror(newargv[inputFile]);
+                    exit(1);
+                }
+            }
+            if (outputFileFlag == 1 && appendFileFlag == 0) {
+                fd2 = open(newargv[outputFile], O_WRONLY | O_TRUNC | O_CREAT, 0644);
+                if (fd2 < 0) {
+                    perror(newargv[outputFile]);
+                    exit(2);
+                }
+                newargv[outputFile] = NULL;
+            }
+            if (appendFileFlag == 1) {
+                fd2 = open(newargv[outputFile], O_WRONLY | O_APPEND, 0644);
+                if (fd2 < 0) {
+                    perror(newargv[outputFile]);
+                    exit(2);
+                }
+                newargv[outputFile] = NULL;
+            }
+
+            inputArray[0] = fd1;
+            inputArray[1] = -1;
+
+            forkPid = pipeLine(newargv[0], newargv, inputArray, pipeFd);
+            jrb_insert_int(deadKids, forkPid, new_jval_v(NULL));
+                close(inputArray[0]);
+                close(inputArray[1]);
+
+            <span style="color:green">/// For loop for handling nested pipes </span>
+            for (int i = 0; i < numPipe; i++) {
+                close(copyOfPipeFd[0]);
+                close(copyOfPipeFd[1]);
+                copyOfPipeFd[0] = pipeFd[0];
+                copyOfPipeFd[1] = pipeFd[1];
+
+                <span style="color:green"> </span>
+                <span style="color:green">///Once the last pipe command is reached, output to file </span>
+                if (i + 1 == numPipe) {
+
+                    outPutArray[0] = -1;
+                    outPutArray[1] = fd2;
+
+                    forkPid = pipeLine(newargv[numPipes[i]], (newargv + numPipes[i]), copyOfPipeFd, outPutArray);
+                    jrb_insert_int(deadKids, forkPid, new_jval_v(NULL));
+                    close(outPutArray[0]);
+                    close(outPutArray[1]);
+                    break;
+                }
+                if (pipe(pipeFd) < 0) {
+                    perror("pipe(pipeFd) 2");
+                    exit(1);
+                }
+                forkPid = pipeLine(newargv[numPipes[i]], (newargv + numPipes[i]), copyOfPipeFd, pipeFd);
+                jrb_insert_int(deadKids, forkPid, new_jval_v(NULL));
+            }
+            close(copyOfPipeFd[0]);
+            close(copyOfPipeFd[1]);
+            close(pipeFd[0]);
+            close(pipeFd[1]);
+        }
+
+        if (ampFlag == 1) {
+            jrb_insert_int(deadKids, forkPid, new_jval_v(NULL));
+        }
+
+        else {
+            jrb_insert_int(deadKids, forkPid, new_jval_v(NULL));
+            while (!jrb_empty(deadKids)){
+                //printf("Hello!\n");
+                childPid = wait(&status);
+                JRB treeOfKids = jrb_find_int(deadKids, childPid);
+                if (treeOfKids){
+                    free(treeOfKids->val.v);
+                    jrb_delete_node(treeOfKids);
+                }
+                if (forkPid == childPid){
+                    break;
+                }
+            }
+        }
+        <span style="color:green">///Clean input array as leftover data causes issues </span>
+        int i = 0;
+        while (1) {
+            if (input[i] == '\0' && input[i + 1] == '\0') {
+                break;
+            }
+            input[i] = '\0';
+            i++;
+        }
+    }
+}
+</pre></td></tr></tbody></table>
+    </div></div>
+
+<!-- Jumps to top of page -->
+<div class="relative rounded-xl overflow-auto p-8">
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#top">Jump to top</a> </div>
+</div>
+<hr>
+
+<!-- Explains difficult aspects of the program or funny stories about the process -->
+<div id="explanation"><h3>Takeaway:</h3></div>
+
+<table><tbody><tr><td><pre class="programInfo">
+    Working on this lab was enjoyable as this lab helped me become acquainted with Unix and Unix commands.
+The most difficult part of this lab was managing nested pipe calls, due to the multiple fork() and pipe() calls that were spawned
+from these calls. If I was to go back and improve this code there are two things I would changes.
+
+    <strong>1.</strong>  I would dynamically allocate memory for the "char input[]" array to cover cases where a command is greater than 8192 chars.
+This would also reduce the amount of memory used by the program as 8192 bytes aren't allocated for every command.
+
+    <strong>2.</strong>  Remove the argv[1] declaration the code.
+I used that declaration for debugging purposes as the "jsh:" annoyed me while working on the program.
+</pre></td></tr></tbody></table>
+
+
+
+<hr>
+
+<footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-between">
+            <div class="w-full md:w-1/2 text-center md:text-left">
+                <p>&copy; 2023 Colin Lyttle</p>
+            </div>
+            <div class="w-full md:w-1/2 text-center md:text-right">
+                <ul class="inline-flex list-none">
+                    <li><a href="Home.html" class="text-white hover:text-white px-3">Home</a></li>
+                    <li><a href="https://www.linkedin.com/in/colin-lyttle-192b53182/" class="text-white hover:text-white px-3">Contact</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</footer>
+</body>
+</html>
