@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<script src="../JAVASCRIPT/buttonAdd.js"></script>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.7/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="output.css"/>
     <link rel="icon" href="../MEDIA/IMAGES/colin.png" type="image/x-icon">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
     <title>Creatine Industries</title>
     <style>
         html, body {
@@ -23,99 +24,78 @@
     </style>
 </head>
 
+
+
 <body>
-    <div class="content">
-        <!-- Navigation bar element -->
-        <nav class="bg-blue-500">
-            <div class="container mx-auto">
-                <ul class="flex">
-                    <li class="mr-6">
-                        <a class="text-white hover:text-gray-200" href="Home.html">Home</a>
-                    </li>
-                    <li class="relative group">
-                        <button class="text-white hover:text-gray-200">Project</button>
-                        <ul class="absolute hidden bg-gray-100 text-gray-800 pt-2 group-hover:block">
-                            <li><a href="exampleWorkOne.html" class="block px-4 py-2">Shell Program</a></li>
-                            <li><a href="exampleWorkTwo.html" class="block px-4 py-2">Multi-threaded Chat Server</a></li>
-                            <li><a href="exampleWorkThree.html" class="block px-4 py-2">Implementation of Malloc</a></li>
-                        </ul>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+<div class="content">
+    <!-- Navigation bar element -->
+    <ul class="navBar">
+        <li class="navList">
+            <a class="navLink" href="Home.html">Home</a>
+        </li>
+        <li class="navList">
+            <a class="navLink">Project</a>
+            <ul class="dropdown">
+                <li><a class="text-white" href="exampleWorkOne.html">Shell Program</a></li>
+                <li><a class="text-white" href="exampleWorkTwo.html">Multi-threaded Chat  Server</a></li>
+                <li><a class ="text-white" href="exampleWorkThree.html">Implementation of Malloc</a></li>
+            </ul>
+        </li>
+    </ul>
 
-        <!-- List of contact info -->
-        <div class="container mx-auto pt-4 pb-32">
-            <div class="flex justify-center">
-                <ol class="border-2 border-orange-400">
-                    <li><img class="photoOfMe" src="../MEDIA/IMAGES/colin.png" alt="Photo of me."></li>
-                    <li>Email Address: <a href="mailto:colinlyttle2000@gmail.com">colinlyttle2000@gmail.com</a></li>
-                    <li>LinkedIn: <a href="https://www.linkedin.com/in/colin-lyttle-192b53182/">https://www.linkedin.com/in/colin-lyttle-192b53182/</a></li>
-                    <li>Github Portfolio: <a href="https://github.com/Billnye29/Portfolio">https://github.com/Billnye29/Portfolio</a></li>
-                </ol>
-            </div>
-        </div>
-        <hr>
-
-        <!-- Paragraph about me -->
-        <div class="container mx-auto pt-4 pb-32">
-            <div class="flex justify-center">
-                <table class="border-2 border-black p-4 mx-8">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <pre>
+    <!-- List of contact Info -->
+    <div class=" pt-4 pb-32 relative rounded-l overflow-auto">
+        <div class="flex justify-center font-mono text-sm leading-6">
+            <ol class="border-2 border-orange-400">
+                <li><img class="photoOfMe" src="../MEDIA/IMAGES/colin.png" alt="Photo of me."></li>
+                <li>Email Address: <a  href="mailto:colinlyttle2000@gmail.com"> colinlyttle2000@gmail.com </a></li>
+                <li>Linkedin: <a href="https://www.linkedin.com/in/colin-lyttle-192b53182/">https://www.linkedin.com/in/colin-lyttle-192b53182/</a></li>
+                <li>Github Portfolio: <a href="https://github.com/Billnye29/Portfolio">https://github.com/Billnye29/Portfolio</a> </li>
+            </ol>
+        </div></div>
+    <hr>
+    <!-- Paragraph about me -->
+    <div class=" pt-4 pb-32 relative rounded-l overflow-auto">
+        <div class="flex justify-center font-mono text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
 My name is Colin Lyttle,
 I'm a junior at the University of Tennessee, working towards my bachelor's in Computer Science.
-I've chosen to major in Computer Science as I enjoy finding and creating solutions to technical challenges.
+I've chose to major in Computer Science as I enjoy finding and creating solutions to technical challenges.
 When I program, I look at programming challenges as a puzzle with multiple possible solutions.
-By approaching programming this way, I find great enjoyment in creating the best possible solution I can
+By approaching programming this way I find great enjoyment in creating the best possible solution I can
 for a programming challenge.
-The programming languages I have the most experience working with are C, C++, and Python.
-I'm also familiar with the basics of Java, JavaScript, and C#.
-                                </pre>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <hr>
-
-        <!-- Paragraph about Website -->
-        <div class="container mx-auto pt-4 pb-32">
-            <div class="flex justify-center">
-                <table class="border-2 border-black p-4 mx-8">
-                    <tbody>
-                        <tr>
-                            <td>
-                                <pre>
+The programing languages I have the most experience working with C,C++, and python.
+I'm also familiar with the basics of Java, Javascript, and C#.
+</pre></td></tr></tbody></table>
+        </div></div>
+<hr>
+    <!-- Paragraph about Website -->
+    <div class=" pt-4 pb-32 relative rounded-l overflow-auto">
+        <div class="flex justify-center font-mono text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
 I've created this website as a repository to display some projects I made for school that I found interesting, enjoyable, or both.
 This site was built with HTML and the Tailwind CSS framework.
-                                </pre>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+</pre></td></tr></tbody></table>
+        </div></div>
+
+
+
+</div>
+
+<footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-between">
+            <div class="w-full md:w-1/2 text-center md:text-left">
+                <p>&copy; 2023 Colin Lyttle</p>
+            </div>
+            <div class="w-full md:w-1/2 text-center md:text-right">
+                <ul class="inline-flex list-none">
+                    <li><a href="Home.html" class="text-white hover:text-white px-3">Home</a></li>
+                    <li><a href="https://www.linkedin.com/in/colin-lyttle-192b53182/" class="text-white hover:text-white px-3">Contact</a></li>
+                </ul>
             </div>
         </div>
     </div>
-
-    <footer class="bg-orange-400 text-white py-4 border-r-2 border-t-2 border-b-2 border-black">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-wrap items-center justify-between">
-                <div class="w-full md:w-1/2 text-center md:text-left">
-                    <p>&copy; 2023 Colin Lyttle</p>
-                </div>
-                <div class="w-full md:w-1/2 text-center md:text-right">
-                    <ul class="inline-flex list-none">
-                        <li><a href="Home.html" class="text-white hover:text-white px-3">Home</a></li>
-                        <li><a href="https://www.linkedin.com/in/colin-lyttle-192b53182/" class="text-white hover:text-white px-3">Contact</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </footer>
+</footer>
 </body>
-
 </html>
