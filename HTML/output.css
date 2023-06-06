@@ -556,6 +556,10 @@ video {
   }
 }
 
+.fixed {
+  position: fixed;
+}
+
 .relative {
   position: relative;
 }
@@ -892,6 +896,16 @@ li a:hover
   font-size: 1rem;
   line-height: 1.5rem;
   font-style: italic;
+}
+
+.jPlank {
+  text-decoration-line: underline;
+  font-style: italic;
+}
+
+.jPlank:hover {
+  --tw-text-opacity: 1;
+  color: rgb(251 146 60 / var(--tw-text-opacity));
 }
 
 .hover\:text-white:hover {

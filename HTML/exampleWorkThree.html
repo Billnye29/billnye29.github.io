@@ -14,7 +14,7 @@
         <a class="navLink" href="Home.html">Home</a>
     </li>
     <li class="navList">
-        <a class="navLink" href="project.html">Project</a>
+        <a class="navLink">Project</a>
         <ul class="dropdown">
             <li><a class="text-white" href="exampleWorkOne.html">Shell Program</a></li>
             <li><a class="text-white" href="exampleWorkTwo.html">Multi-threaded Chat  Server</a></li>
@@ -26,7 +26,8 @@
 <h1>Program description:</h1>
 <!-- Paragraph about the program -->
 <table><tbody><tr><td><pre class="programInfo">
-
+This program was created for one of my junior level classes.
+The program below is my own implementation of malloc which has to have the following functionality <strong>coalesce</strong>, <strong>free</strong>, and <strong>malloc</strong>.
 </pre></td></tr></tbody></table>
 <hr>
 
@@ -35,19 +36,21 @@
 
 <!-- Jumps to the bottom of the page -->
 <div class="relative rounded-xl overflow-auto p-8">
-    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Explanation</a> </div>
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Bottom</a> </div>
 </div>
 
 <!-- Contains program and comments about said program -->
 <div class="relative rounded-l overflow-auto">
     <div class="flex justify-center font-mono text-sm leading-6">
         <table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
+<span style="color:darkred">
 /*
  * Colin Lyttle
  * malloc.c
  * 4/09/2023
  * My own implementation of malloc
 */
+</span>
 #include &lt;unistd.h&gt;
 
 #define MIN_SBRK_SIZE 8192
@@ -56,7 +59,6 @@ typedef struct BLOCK {
     int size;
     int count;
     struct BLOCK *next;
-    // struct BLOCK *prev;
 } *BLOCK;
 
 BLOCK head = NULL;
@@ -256,10 +258,10 @@ void coalesce_free_list() {
 <hr>
 
 <!-- Explains difficult aspects of the program or funny stories about the process -->
-<div id="explanation"><h3>Explanation:</h3></div>
-
+<div id="explanation"><h3>Takeaway:</h3></div>
 <table><tbody><tr><td><pre class="programInfo">
-
+This was a pretty straight forward program to make.
+Unlike other programs I made I felt that this one was straight forward and relatively easy.
 </pre></td></tr></tbody></table>
 
 <hr>

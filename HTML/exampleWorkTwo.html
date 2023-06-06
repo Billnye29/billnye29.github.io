@@ -14,7 +14,7 @@
         <a class="navLink" href="Home.html">Home</a>
     </li>
     <li class="navList">
-        <a class="navLink" href="project.html">Project</a>
+        <a class="navLink">Project</a>
         <ul class="dropdown">
             <li><a class="text-white" href="exampleWorkOne.html">Shell Program</a></li>
             <li><a class="text-white" href="exampleWorkTwo.html">Multi-threaded Chat  Server</a></li>
@@ -26,7 +26,13 @@
 <h1>Program description:</h1>
 <!-- Paragraph about the program -->
 <table><tbody><tr><td><pre class="programInfo">
-
+    This program was created for one of my junior level classes.
+We were provided and required to use predefined libraries created by Professor James S. Plank inorder to gain experience working with outside libraries.
+This program is a multi-threaded chat server which can serve any number of clients over an SSH connection.
+The program is launched with the following arguments <strong>./chat-server port Chat-Room-Names</strong>.
+Port is the port of the server, and Chat-Room-Names is formatted as such <strong>"Room_1 Room_2 Room_n"</strong>.
+This program utilizes the following libraries <strong>"dllist.h"</strong>,<strong> "jrb.h"</strong>, and <strong>"sockettome.h"</strong>.
+These libraries were created by  <a class="jPlank" href="http://web.eecs.utk.edu/~jplank/">Professor James S. Plank</a>.
 </pre></td></tr></tbody></table>
 <hr>
 
@@ -36,59 +42,59 @@
 
 <!-- Jumps to the bottom of the page -->
 <div class="relative rounded-xl overflow-auto p-8">
-    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Explanation</a> </div>
+    <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#explanation">Jump to Bottom</a> </div>
 </div>
 
 <!-- Contains program and comments about said program -->
 <div class="relative rounded-l overflow-auto">
     <div class="flex justify-center font-mono text-sm leading-6">
         <table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
-
+<span style="color:darkred">
 /*
  * Colin Lyttle
  * chatServer.c
  * 5/9/2023
  * This is my chat server. There are many like it, but I've locked the mutex so it's mine.
 */
+        </span>
 #include stdio.h
 #include stdlib.h
 #include unistd.h
 #include string.h
 #include pthread.h
-#include "jrb.h"
-#include "dllist.h"
-#include "sockettome.h"
+#include "jrb.h"  <span style="color:dodgerblue"> "Jrb.h is a predefined red black tree with traversal, insertion,  and deletion operations."</span>
+#include "dllist.h"  <span style="color:dodgerblue"> "dllist.h is a predefined doubly linked list with insertion, and deletion operations."</span>
+#include "sockettome.h" <span style="color:dodgerblue"> "sockettome.h is a predefined SSH socket creator."</span>
 
 
 void segPipeIgnore(int pipeSFX) {
     printf("segPipeIgnore\n");
 }
-
-
+<span style="color:green">Holds basic information for the client thread.</span>
 struct threadInfo
 {
     char chatroomName[1000];
-    char userName[1000]; ///Good
+    char userName[1000];
     Dllist clientsPtr;
     Dllist msgPtr;
     Dllist chatrooms;
-    pthread_mutex_t *lock; ///Good
-    pthread_cond_t *cond; ///Good!
+    pthread_mutex_t *lock;
+    pthread_cond_t *cond;
     FILE *fin;
     FILE *fout;
 
 }threadInfo;
-
+<span style="color:green"> Holds information for the chatroom thread.</span>
 struct chatRoomInfo
 {
-    char roomName[1000];///Good
-    pthread_mutex_t *lock; ///Good
-    pthread_cond_t *cond; ///Good!
-    Dllist clients;///Good
-    Dllist messages; ///Good
+    char roomName[1000];
+    pthread_mutex_t *lock;
+    pthread_cond_t *cond;
+    Dllist clients;
+    Dllist messages;
 }chatty;
 
-
+<span style="color:green">Gets the client's username.</span>
 void username(struct threadInfo *t)
 {
     char s[1000];
@@ -112,7 +118,7 @@ void username(struct threadInfo *t)
     s[strlen(s)-1] = '\0';
     strcpy(t->userName,s);
 }
-
+<span style="color:green">Gets what chatroom the client is trying to enter and places the client into the chatroom.</span>
 void enterChatRoom(struct threadInfo *t)
 {
     struct chatRoomInfo *tmpChatroom;
@@ -139,12 +145,12 @@ void enterChatRoom(struct threadInfo *t)
 
     dll_traverse(chatroomTraverse,t->chatrooms)
     {
-        ///This is pulling out a chatroom struct
+        <span style="color:green"> ///This is pulling out a chatroom struct </span>
         tmpChatroom = chatroomTraverse->val.v;
         if(strcmp(tmpChatroom->roomName,s) == 0)
         {
             printf("1. enterChatRoom() tmpInf->lock\n");
-            if (pthread_mutex_lock(tmpChatroom->lock) != 0) { perror("Mutex lock"); exit(1); } /// LOCKING tmpInf->
+            if (pthread_mutex_lock(tmpChatroom->lock) != 0) { perror("Mutex lock"); exit(1); } <span style="color:green">/// LOCKING tmpInf-> </span>
             printf("Adding New User! %s\n", t->userName);
 
             dll_append(tmpChatroom->clients, new_jval_v((void *) t));
@@ -166,14 +172,14 @@ void enterChatRoom(struct threadInfo *t)
 
             printf("1. enterChatRoom() pthread_mutex_unlock tmpInf->\n");
              pthread_cond_signal(tmpChatroom->cond);
-            if (pthread_mutex_unlock(tmpChatroom->lock) != 0) { perror("Mutex unlock"); exit(1); } /// UNLOCKING tmpInf->
+            if (pthread_mutex_unlock(tmpChatroom->lock) != 0) { perror("Mutex unlock"); exit(1); } <span style="color:green"> /// UNLOCKING tmpInf-> </span>
 
             break;
         }
     }
     printf("%s has joined\n", t->userName);
 }
-
+<span style="color:green">Controls getting messages from the client and sends them to the client.</span>
 void userIo(struct threadInfo *t)
 {
 
@@ -200,7 +206,7 @@ void userIo(struct threadInfo *t)
         }
 
 
-        if (pthread_mutex_lock(t->lock) != 0) { perror("Mutex lock"); exit(1); } /// LOCKING tmpIntr->
+        if (pthread_mutex_lock(t->lock) != 0) { perror("Mutex lock"); exit(1); } <span style="color:green"> /// LOCKING tmpIntr-> </span>
         printf("1. userIo() | LOCKING %s\n",t->chatroomName);
 
         dll_append(t->msgPtr, new_jval_s(strdup(tmpDisconnectMessage)));
@@ -209,7 +215,7 @@ void userIo(struct threadInfo *t)
         printf("1. userIo() | SENDING SIGNAL to %s\n",t->chatroomName);
         pthread_cond_signal(t->cond);
         printf("1. userIo() | SIGNAL FINISHED from %s\n",t->chatroomName);
-        if (pthread_mutex_unlock(t->lock) != 0) {  perror("Mutex unlock"); exit(1); } /// UNLOCKING tmpIntr->
+        if (pthread_mutex_unlock(t->lock) != 0) {  perror("Mutex unlock"); exit(1); } <span style="color:green">/// UNLOCKING tmpIntr-> </span>
         printf("1. userIo() | Unlocking %s\n",t->chatroomName);
 
 
@@ -225,36 +231,35 @@ void userIo(struct threadInfo *t)
     strcat(formattedMessage,s);
 
     printf("2. userIo() | Thinking about locking %s\n",t->chatroomName);
-    if (pthread_mutex_lock(t->lock) != 0) {  perror("Mutex lock"); exit(1); } /// LOCKING CHATROOM
+    if (pthread_mutex_lock(t->lock) != 0) {  perror("Mutex lock"); exit(1); } <span style="color:green">/// LOCKING CHATROOM  </span>
     printf("2. userIo() | LOCKING %s\n",t->chatroomName);
     printf("userIo() | USER: %s added message %s to chatroom %s!\n",t->userName,formattedMessage,t->chatroomName);
     dll_append(t->msgPtr, new_jval_s(strdup(formattedMessage)));
     printf("2. userIo() | SENDING SIGNAL to %s\n",t->chatroomName);
     pthread_cond_signal(t->cond);
     printf("2. userIo() | SIGNAL FINISHED from %s\n",t->chatroomName);
-    if (pthread_mutex_unlock(t->lock) != 0) { perror("Mutex unlock"); exit(1); } /// UNLOCKING CHATROOM
+    if (pthread_mutex_unlock(t->lock) != 0) { perror("Mutex unlock"); exit(1); } <span style="color:green"> /// UNLOCKING CHATROOM  </span>
     printf("2. userIo() | Unlocking %s\n",t->chatroomName);
 }
 
 
-
+<span style="color:green">This is the main chatroom thread which sends messages to all the clients.</span>
 void *chatRoomThread(void *arg)
 {
     struct chatRoomInfo *chat  = arg;
     printf("Thread Room Name: %s\n", chat->roomName);
-    /// Sends the message to all users
-
+<span style="color:green"> /// Sends the message to all users</span>
     while(1)
     {
         printf("chatRoomThread() | pthread_cond_wait %s\n", chat->roomName);
-        pthread_cond_wait(chat->cond, chat->lock); /// Locking chat struct
+        pthread_cond_wait(chat->cond, chat->lock); <span style="color:green"> /// Locking chat struct</span>
 
        printf("chatRoomThread() | UNLOCKING WAIT %s\n", chat->roomName);
 
         printf("SENDING MESSAGE TO CLIENT! From ChatRoom %s\n",chat->roomName);
         while(!dll_empty(chat->messages))
         {
-            ///Sends the message to all users
+            <span style="color:green">///Sends the message to all users </span>
             Dllist fdPtr;
             struct threadInfo *tmpThreadPtr;
 
@@ -288,7 +293,7 @@ void *chatRoomThread(void *arg)
 
     }
 }
-
+<span style="color:green">Newly created client threads are sent here to wait to get added to a chatroom.</span>
 void *waitRoom(void *arg)
 {
 
@@ -307,12 +312,12 @@ void *waitRoom(void *arg)
         printf("PIPE!!!!\n");
     }
 
-    ///Prevents new users from being added before thread is done
+    <span style="color:green">///Prevents new users from being added before thread is done </span>
     Dllist chatTraverse;
     Dllist userTraverse;
     dll_traverse(chatTraverse,info->chatrooms)
     {
-        ///Pulling up a chatroom Struct
+        <span style="color:green">///Pulling up a chatroom Struct </span>
         tmpChatroomPtr = chatTraverse->val.v;
 
         if (fputs(tmpChatroomPtr->roomName, info->fout) == EOF) {
@@ -338,7 +343,7 @@ void *waitRoom(void *arg)
         }
 
 
-        if (pthread_mutex_lock(tmpChatroomPtr->lock) != 0) { perror("Mutex lock"); exit(1); } /// LOCKING CHATROOM
+        if (pthread_mutex_lock(tmpChatroomPtr->lock) != 0) { perror("Mutex lock"); exit(1); } <span style="color:green">/// LOCKING CHATROOM </span>
         dll_traverse(userTraverse,tmpChatroomPtr->clients)
         {
 
@@ -368,7 +373,7 @@ void *waitRoom(void *arg)
             }
         }
 
-        if (pthread_mutex_unlock(tmpChatroomPtr->lock) != 0) { perror("Mutex unlock"); exit(1); } /// UNLOCKING CHATROOM
+        if (pthread_mutex_unlock(tmpChatroomPtr->lock) != 0) { perror("Mutex unlock"); exit(1); } <span style="color:green">/// UNLOCKING CHATROOM</span>
 
         if (fputs("\n", info->fout) == EOF) {
 
@@ -394,9 +399,9 @@ void *waitRoom(void *arg)
         printf("PIPE!!!!\n");
     }
 
-    ///Gets username from file
+    <span style="color:green">///Gets username from file </span>
     username(info);
-    /// Attempting to enter a chat room
+    <span style="color:green"> /// Attempting to enter a chat room </span>
 
     if (fputs("Enter chat room:\n", info->fout) == EOF) {
 
@@ -409,11 +414,11 @@ void *waitRoom(void *arg)
         printf("PIPE!!!!\n");
     }
 
-    ///Sup
+
 
     enterChatRoom(info);
 
-    ///This is where client threads will spool, sending messages and such.
+    <span style="color:green"> ///This is where client threads will spool, sending messages and such.</span>
     while(1)
     {
         userIo(info);
@@ -423,7 +428,7 @@ void *waitRoom(void *arg)
 
 int main(int argc, char **argv) {
     //argv[1] = "8001";
-    /// Creating threads
+    <span style="color:green">/// Creating threads </span>
     int port, fd;
     pthread_t server,client;
     Dllist currentRooms;
@@ -436,10 +441,10 @@ int main(int argc, char **argv) {
     }
 
     int index = 2;
-    /// Creates chatRoom threads
+    <span style="color:green">/// Creates chatRoom threads </span>
     for(int i = 0; i < argc-2; i++)
     {
-        //printf("New Chatroom Starting\n");
+
         struct chatRoomInfo *chat;
         chat = malloc(sizeof(chatty));
         strcpy(chat->roomName,argv[index]);
@@ -451,14 +456,14 @@ int main(int argc, char **argv) {
         pthread_cond_init(chat->cond, NULL);
         dll_append(currentRooms,new_jval_v((void *) chat));
         if (pthread_create(&server, NULL, chatRoomThread, (void*)chat) != 0) {
-            printf("pthread_create chatRoomThread");
+
             exit(1);
         }
         index++;
     }
 
     int sock = serve_socket(port);
-    printf("Spooling Server\n");
+
     int threadId = 0;
 
     while (1)
@@ -470,6 +475,7 @@ int main(int argc, char **argv) {
             FILE *fin = fdopen(fd, "r");
 
             printf("Thread: %d | New Client!\n",threadId);
+
             struct threadInfo *threadInf;
 
             threadInf = malloc(sizeof(threadInfo));
@@ -496,13 +502,15 @@ int main(int argc, char **argv) {
 <hr>
 
 <!-- Explains difficult aspects of the program or funny stories about the process -->
-<div id="explanation"><h3>Explanation:</h3></div>
+<div id="explanation"><h3>Takeaway:</h3></div>
 
 <table><tbody><tr><td><pre class="programInfo">
-
+    This was my first foray in writing a multi-threaded program.
+The most difficult part of this program was diagnosing a conditional deadlock condition.
+This deadlock occurred only when a client sent multiple messages within milliseconds of each other.
+When this occurred all but the last message would get sent to the server, causing the client to hang.
+I fixed this bug by changing when the mutex was locked in the <strong>chatroom()</strong> function.
 </pre></td></tr></tbody></table>
-
-<div class=""> <a href="exampleWorkOne.html">dwadwadw</a></div>
 
 <hr>
 
