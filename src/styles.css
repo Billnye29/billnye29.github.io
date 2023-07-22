@@ -7,23 +7,16 @@ body{
     margin: 0;
     display: block;
 }
-.testList2
-{
-    list-style-type: none;
-}
+
 .photoOfMe
 {
  margin: 0;
 }
-ol
-{
-    padding: 0 0 20px 0;
-    list-style-type: none;
 
 
-}
 .navBar
 {
+
     list-style-type: none;
     margin: 0;
     @apply bg-orange-400;
@@ -57,6 +50,7 @@ li a:hover
 .navList:hover .dropdown {
     display: block;
 }
+
 .programInfo
 {
     font-family: "Times New Roman", serif;

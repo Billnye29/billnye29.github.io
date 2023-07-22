@@ -8,6 +8,7 @@
     <title>Shell Program</title>
 </head>
 <body>
+<div class="content">
 <!-- Navigation bar element -->
 <ul class="navBar">
     <li class="navList">
@@ -23,18 +24,20 @@
     </li>
 </ul>
 
-<h1>Program description:</h1>
 
-<!-- Paragraph about the program -->
-<table class="font-serif antialiased leading-normal "><tbody><tr><td><pre class="programInfo">
-    This program was created for one of my junior level classes.
+<h1>Program description:</h1>
+    <!-- Paragraph about the program -->
+    <div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+        <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
+ This program was created for one of my junior level classes.
 We were provided and required to use predefined libraries created by Professor James S. Plank inorder to gain experience working with outside libraries.
 The purpose of this program was to create a limited version of csh/sh/bash.
 This version could execute commands, redirect input/output, and implement the operations<strong> < , >, >>, & and |</strong>.
 In this program I wasn't expected to deal with quotes, environment variable expansions, pattern matching, job control or command histories.
 This program utilizes libraries <strong>"jval.h"</strong> and<strong> "jrb.h"</strong> which were created by <a class="jPlank" href="http://web.eecs.utk.edu/~jplank/">Professor James S. Plank</a>.
 </pre></td></tr></tbody></table>
-
+        </div></div>
 <hr>
 <!-- Holds the top position for the jump element -->
 <h2 id="top" class="pb-8 font-bold">Program: </h2>
@@ -45,19 +48,18 @@ This program utilizes libraries <strong>"jval.h"</strong> and<strong> "jrb.h"</s
 </div>
 
 <!-- Contains program and comments about said program -->
-<div class="relative rounded-l overflow-auto">
-    <div class="flex justify-center font-mono text-sm leading-6">
-<table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
-    <span style="color:darkred">
+    <div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+        <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
 /*
  * Colin Lyttle
  * 4/23/2023
  * My own Shell Script
  * This is a program focuses on using pipes, dup, fork, and exec, to get a deeper understanding on how shells work.
 */
-    </span>
+                </span>
 
-#include stdio.h
+                #include stdio.h
 #include unistd.h
 #include string.h
 #include stdlib.h
@@ -382,7 +384,7 @@ int main(int argc, char **argv) {
     }
 }
 </pre></td></tr></tbody></table>
-    </div></div>
+        </div></div>
 
 <!-- Jumps to top of page -->
 <div class="relative rounded-xl overflow-auto p-8">
@@ -392,8 +394,9 @@ int main(int argc, char **argv) {
 
 <!-- Explains difficult aspects of the program or funny stories about the process -->
 <div id="explanation"><h3>Takeaway:</h3></div>
-
-<table><tbody><tr><td><pre class="programInfo">
+    <div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+        <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
     Working on this lab was enjoyable as this lab helped me become acquainted with Unix and Unix commands.
 The most difficult part of this lab was managing nested pipe calls, due to the multiple fork() and pipe() calls that were spawned
 from these calls. If I was to go back and improve this code there are two things I would changes.
@@ -404,16 +407,15 @@ This would also reduce the amount of memory used by the program as 8192 bytes ar
     <strong>2.</strong>  Remove the argv[1] declaration the code.
 I used that declaration for debugging purposes as the "jsh:" annoyed me while working on the program.
 </pre></td></tr></tbody></table>
-
-
+        </div></div>
 
 <hr>
-
+</div>
 <footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
     <div class="container mx-auto px-4">
         <div class="flex flex-wrap items-center justify-between">
             <div class="w-full md:w-1/2 text-center md:text-left">
-                <p>&copy; 2023 Colin Lyttle</p>
+                <p>2023 Colin Lyttle</p>
             </div>
             <div class="w-full md:w-1/2 text-center md:text-right">
                 <ul class="inline-flex list-none">

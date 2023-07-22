@@ -25,10 +25,15 @@
 
 <h1>Program description:</h1>
 <!-- Paragraph about the program -->
-<table><tbody><tr><td><pre class="programInfo">
+
+<div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+    <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+        <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
 This program was created for one of my junior level classes.
 The program below is my own implementation of malloc which has to have the following functionality <strong>coalesce</strong>, <strong>free</strong>, and <strong>malloc</strong>.
 </pre></td></tr></tbody></table>
+    </div></div>
+
 <hr>
 
 <!-- Holds the top position for the jump element -->
@@ -40,17 +45,9 @@ The program below is my own implementation of malloc which has to have the follo
 </div>
 
 <!-- Contains program and comments about said program -->
-<div class="relative rounded-l overflow-auto">
-    <div class="flex justify-center font-mono text-sm leading-6">
-        <table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
-<span style="color:darkred">
-/*
- * Colin Lyttle
- * malloc.c
- * 4/09/2023
- * My own implementation of malloc
-*/
-</span>
+<div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+    <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+        <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
 #include &lt;unistd.h&gt;
 
 #define MIN_SBRK_SIZE 8192
@@ -249,8 +246,6 @@ void coalesce_free_list() {
 </pre></td></tr></tbody></table>
     </div></div>
 
-
-
 <!-- Jumps to top of page -->
 <div class="relative rounded-xl overflow-auto p-8">
     <div class="flex justify-center font-mono text-white text-sm font-bold leading-6"><a class="bg-orange-500 rounded-lg shadow-lg p-4 mx-8" href="#top">Jump to top</a> </div>
@@ -259,17 +254,23 @@ void coalesce_free_list() {
 
 <!-- Explains difficult aspects of the program or funny stories about the process -->
 <div id="explanation"><h3>Takeaway:</h3></div>
-<table><tbody><tr><td><pre class="programInfo">
+
+
+<div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+    <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+        <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
 This was a pretty straight forward program to make.
 Unlike other programs I made I felt that this one was straight forward and relatively easy.
 </pre></td></tr></tbody></table>
+    </div></div>
+
 
 <hr>
 <footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
     <div class="container mx-auto px-4">
         <div class="flex flex-wrap items-center justify-between">
             <div class="w-full md:w-1/2 text-center md:text-left">
-                <p>&copy; 2023 Colin Lyttle</p>
+                <p>2023 Colin Lyttle</p>
             </div>
             <div class="w-full md:w-1/2 text-center md:text-right">
                 <ul class="inline-flex list-none">

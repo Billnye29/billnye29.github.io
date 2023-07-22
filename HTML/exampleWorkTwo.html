@@ -6,10 +6,25 @@
     <link rel="icon" href="../MEDIA/IMAGES/colin.png" type="image/x-icon">
     <meta charset="UTF-8">
     <title>Multi-threaded Chat Server</title>
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .content {
+            flex: 1 0 auto;
+        }
+    </style>
 </head>
 <body>
+<div class="content">
 <!-- Navigation bar element -->
-<ul class="navBar">
+<ul class="navBar ">
     <li class="navList">
         <a class="navLink" href="Home.html">Home</a>
     </li>
@@ -25,8 +40,10 @@
 
 <h1>Program description:</h1>
 <!-- Paragraph about the program -->
-<table><tbody><tr><td><pre class="programInfo">
-    This program was created for one of my junior level classes.
+    <div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+        <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
+  This program was created for one of my junior level classes.
 We were provided and required to use predefined libraries created by Professor James S. Plank inorder to gain experience working with outside libraries.
 This program is a multi-threaded chat server which can serve any number of clients over an SSH connection.
 The program is launched with the following arguments <strong>./chat-server port Chat-Room-Names</strong>.
@@ -34,8 +51,9 @@ Port is the port of the server, and Chat-Room-Names is formatted as such <strong
 This program utilizes the following libraries <strong>"dllist.h"</strong>,<strong> "jrb.h"</strong>, and <strong>"sockettome.h"</strong>.
 These libraries were created by  <a class="jPlank" href="http://web.eecs.utk.edu/~jplank/">Professor James S. Plank</a>.
 </pre></td></tr></tbody></table>
-<hr>
+        </div></div>
 
+<hr>
 
 <!-- Holds the top position for the jump element -->
 <h2 id="top" class="pb-8 font-bold">Program: </h2>
@@ -46,18 +64,10 @@ These libraries were created by  <a class="jPlank" href="http://web.eecs.utk.edu
 </div>
 
 <!-- Contains program and comments about said program -->
-<div class="relative rounded-l overflow-auto">
-    <div class="flex justify-center font-mono text-sm leading-6">
-        <table class="border-double border-4 border-black p-4 mx-8 font-mono text-xs"><tbody><tr><td><pre>
-<span style="color:darkred">
-/*
- * Colin Lyttle
- * chatServer.c
- * 5/9/2023
- * This is my chat server. There are many like it, but I've locked the mutex so it's mine.
-*/
-        </span>
-#include stdio.h
+<div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+        <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
+  #include stdio.h
 #include stdlib.h
 #include unistd.h
 #include string.h
@@ -493,7 +503,9 @@ int main(int argc, char **argv) {
 
 }
 </pre></td></tr></tbody></table>
-    </div></div>
+        </div></div>
+
+
 
 <!-- Jumps to top of page -->
 <div class="relative rounded-xl overflow-auto p-8">
@@ -504,21 +516,27 @@ int main(int argc, char **argv) {
 <!-- Explains difficult aspects of the program or funny stories about the process -->
 <div id="explanation"><h3>Takeaway:</h3></div>
 
-<table><tbody><tr><td><pre class="programInfo">
+
+    <div class=" pt-2 sm:pt-4 pb-16 sm:pb-32 relative rounded-l overflow-scroll">
+        <div class="flex sm:justify-center font-mono text-sm sm:text-xl">
+            <table class="border-2 border-black p-4 mx-8 font-mono text-sm"><tbody><tr><td><pre>
     This was my first foray in writing a multi-threaded program.
 The most difficult part of this program was diagnosing a conditional deadlock condition.
 This deadlock occurred only when a client sent multiple messages within milliseconds of each other.
 When this occurred all but the last message would get sent to the server, causing the client to hang.
 I fixed this bug by changing when the mutex was locked in the <strong>chatroom()</strong> function.
 </pre></td></tr></tbody></table>
+        </div></div>
+
 
 <hr>
 
+</div>
 <footer class="bg-orange-400 text-white py-4 flex border-r-2  border-t-2 border-b-2 border-black">
     <div class="container mx-auto px-4">
         <div class="flex flex-wrap items-center justify-between">
             <div class="w-full md:w-1/2 text-center md:text-left">
-                <p>&copy; 2023 Colin Lyttle</p>
+                <p>2023 Colin Lyttle</p>
             </div>
             <div class="w-full md:w-1/2 text-center md:text-right">
                 <ul class="inline-flex list-none">
@@ -529,5 +547,6 @@ I fixed this bug by changing when the mutex was locked in the <strong>chatroom()
         </div>
     </div>
 </footer>
+
 </body>
 </html>
