@@ -854,6 +854,10 @@ li a:hover
     justify-content: center;
   }
 
+  .sm\:overflow-auto {
+    overflow: auto;
+  }
+
   .sm\:pb-32 {
     padding-bottom: 8rem;
   }
